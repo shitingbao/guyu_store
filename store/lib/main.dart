@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'stb App',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
@@ -44,40 +44,63 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  var selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          SafeArea(
-            child: NavigationRail(
-              extended: false,
-              destinations: [
-                NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('Home'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.favorite),
-                  label: Text('Favorites'),
-                ),
-              ],
-              selectedIndex: 0,
-              onDestinationSelected: (value) {
-                print('selected: $value');
-              },
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = FavoritesPage();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+        body: Row(
+          children: [
+            SafeArea(
+              child: NavigationRail(
+                extended: constraints.maxWidth >= 600,
+                destinations: [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.home),
+                    label: Text('Home'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.favorite),
+                    label: Text('Favorites'),
+                  ),
+                ],
+                selectedIndex: selectedIndex,
+                onDestinationSelected: (value) {
+                  setState(() {
+                    // 需要设置set 不然不生效
+                    selectedIndex = value;
+                  });
+                },
+              ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: GeneratorPage(),
+            Expanded(
+              child: Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: page,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -136,7 +159,7 @@ class BigCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    var type = theme.textTheme.displayMedium!.copyWith(
+    var style = theme.textTheme.displayMedium!.copyWith(
       color: theme.colorScheme.onPrimary,
     );
     return Card(
@@ -145,10 +168,38 @@ class BigCard extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Text(
           word.asLowerCase,
-          style: type,
+          style: style,
           semanticsLabel: word.asPascalCase,
         ),
       ),
+    );
+  }
+}
+
+class FavoritesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    if (appState.favorites.isEmpty) {
+      return Center(
+        child: Text('No favorites yet.'),
+      );
+    }
+
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text('You have '
+              '${appState.favorites.length} favorites:'),
+        ),
+        for (var pair in appState.favorites)
+          ListTile(
+            leading: Icon(Icons.favorite),
+            title: Text(pair.asLowerCase),
+          ),
+      ],
     );
   }
 }
