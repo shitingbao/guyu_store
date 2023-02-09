@@ -41,6 +41,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       favorites.add(current);
     }
+    notifyListeners(); // 加入该方法实时监听
   }
 }
 
