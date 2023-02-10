@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './index.dart';
+import 'page/generator.dart';
 import './page/favourite.dart';
+import './page/download.dart';
 import './core/word.dart';
 
 void main() {
@@ -45,6 +46,9 @@ class _MyHomePageState extends State<MyHomePage> {
       case 1:
         page = FavoritesPage();
         break;
+      case 2:
+        page = Download();
+        break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -63,6 +67,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   NavigationRailDestination(
                     icon: Icon(Icons.favorite),
                     label: Text('Favorites'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.download),
+                    label: Text('Download'),
                   ),
                 ],
                 selectedIndex: selectedIndex,
